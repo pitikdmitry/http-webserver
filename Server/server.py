@@ -10,9 +10,10 @@ class Server:
         self._handler = handler
 
     def start(self):
+
         event_loop = asyncio.get_event_loop()
-        factory = asyncio.start_server(self._handler.handle_hello, host=self._address, port=self._port)
-        server = event_loop.run_until_complete(factory)
+        task = asyncio.start_server(self._handler.handle, host=self._address, port=self._port)
+        event_loop.create_task(task)
         logging.debug('starting up on {} port {}'.format(self._address, self._port))
 
         try:
@@ -21,7 +22,7 @@ class Server:
             pass
         finally:
             logging.debug('closing server')
-            server.close()
-            event_loop.run_until_complete(server.wait_closed())
+            task.close()
+            event_loop.run_until_complete(task.wait_closed())
             logging.debug('closing event loop')
             event_loop.close()

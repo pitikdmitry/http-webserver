@@ -11,6 +11,6 @@ async def tcp_echo_client(message, loop):
 
 
 loop = asyncio.get_event_loop()
-message = "hello world"
+message = "GET / HTTP/1.1\n"
 loop.run_until_complete(tcp_echo_client(message, loop))
 loop.close()
