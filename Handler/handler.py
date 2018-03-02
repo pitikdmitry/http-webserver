@@ -29,7 +29,7 @@ class Handler:
 
         if len(data) > 0:
             request = self._parser.get_values(data.decode())
-            self._executor.execute_request(request)
+            self._executor.execute(request)
             log.debug('received {!r}'.format(data))
             writer.write(data)
             await writer.drain()
@@ -38,8 +38,3 @@ class Handler:
             log.debug('closing')
             writer.close()
             return
-
-
-
-
-
