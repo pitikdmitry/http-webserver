@@ -5,6 +5,8 @@ from models.file import File
 from models.request import Request
 from models.response import Response
 
+import aiofiles
+
 
 class ForbiddenError(BaseException):
     pass
@@ -14,37 +16,64 @@ class NotFoundError(BaseException):
     pass
 
 
-class Executor:
+class Executor: #   добавить async методы сюда везде
 
     def __init__(self):
         pass
 
-    def execute(self, request: Request):
+    def execute(self, request: Request) -> Response:
         if request.method not in ('GET', 'HEAD'):
             return Response(Response.OK, protocol=request.protocol)
         elif request.method == "HEAD":
-            self.execute_head(request)
+            return self.execute_head(request)
         else:
-            self.execute_get(request)
+            return self.execute_get(request)
 
-    def execute_head(self, request: Request):
-        self._build_resource(request)
+    def execute_head(self, request: Request) -> Response:
+        try:
+            file = self.get_file(request)
+        except ForbiddenError:
+            return Response(status_code=Response.FORBIDDEN, protocol=request.protocol)
+        # try:
+        #     content_length = self._build_content_length(resource=resource)
+        # except NotFoundError:
+        #     return Response(status_code=StatusCodes.NOT_FOUND, protocol=request.protocol)
+        #
+        # return Response(status_code=StatusCodes.OK, protocol=request.protocol,
+        #                 content_length=content_length, content_type=resource.content_type.value, body=b'')
 
     def execute_get(self, request: Request):
-        self._build_resource(request)
+        try:
+            file = self.get_file(request)
+        except ForbiddenError:
+            return Response(status_code=Response.FORBIDDEN, protocol=request.protocol)
 
-    def _build_resource(self, request: Request) -> File:
+        try:
+            body = self.read_file(file.file_path)
+        except FileNotFoundError:
+            if request.url[-1:] == '/':
+                return Response(status_code=Response.FORBIDDEN, protocol=request.protocol)
+            else:
+                return Response(status_code=Response.NOT_FOUND, protocol=request.protocol)
+        except NotADirectoryError:
+            return Response(status_code=Response.NOT_FOUND, protocol=request.protocol)
 
-        url = self.check_last_slash(request.url)
-        self.check_dots(url)
+        return Response(status_code=Response.OK,
+                        protocol=request.protocol,
+                        content_type=file.content_type.value,
+                        content_length=len(body),
+                        body=body)
+
+    def get_file(self, request: Request) -> File:
+
+        file_path = self.check_last_slash(request.url)
+        self.check_dots(file_path)
 
         working_dir = os.getcwd()
-        print(working_dir)
-        file_path = os.path.join(working_dir + "/tests/static", url)
+        full_file_path = os.path.join(working_dir + "/tests/static", file_path)
         content_type = self.get_content_type(file_path)
 
-        # return File(path=filename, file_path=file_path, content_type=content_type)
-        return File()
+        return File(full_file_path, content_type)
 
     @staticmethod
     def check_last_slash(url: str) -> str:
@@ -59,9 +88,14 @@ class Executor:
             raise ForbiddenError
 
     @staticmethod
-    def get_content_type(file_path) -> str:
+    def get_content_type(file_path) -> ContentTypes:
         try:
-            content_type = file_path.split('.')[-1]
-            return ContentTypes[content_type]
+            content_type_name = file_path.split('.')[-1]
+            return ContentTypes[content_type_name]
         except KeyError:
             return ContentTypes["plain"]
+
+    @staticmethod
+    def read_file(filename: str) -> bytes:
+        with aiofiles.open(filename, mode='rb') as f:
+            return f.read()

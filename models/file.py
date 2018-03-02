@@ -1,6 +1,9 @@
+from models.content_types import ContentTypes
+
+
 class File:
 
-    def __init__(self, file_path: str = None, content_type: str = None) -> None:
+    def __init__(self, file_path: str = None, content_type: ContentTypes = None) -> None:
         self._file_path = file_path
         self._content_type = content_type
 
@@ -9,5 +12,5 @@ class File:
         return self._file_path
 
     @property
-    def content_type(self) -> str:
+    def content_type(self) -> ContentTypes:
         return self._content_type
