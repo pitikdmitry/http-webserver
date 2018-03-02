@@ -22,7 +22,7 @@ class Server:
             pass
         finally:
             logging.debug('closing server')
-            task.close()
-            event_loop.run_until_complete(task.wait_closed())
+            # task.close()
+            # event_loop.run_until_complete(task.wait_closed())
             logging.debug('closing event loop')
-            event_loop.close()
+            # event_loop.close()

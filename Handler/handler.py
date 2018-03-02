@@ -2,12 +2,14 @@ import logging
 
 from Handler.executor import Executor
 from Handler.parser import Parser
+from Handler.serializer import Serializer
 
 
 class Handler:
     def __init__(self):
         self._parser = Parser()
         self._executor = Executor()
+        self._serializer = Serializer()
 
     async def handle(self, reader, writer):
         address = writer.get_extra_info('peername')
@@ -28,12 +30,17 @@ class Handler:
                 break
 
         if len(data) > 0:
-            request = self._parser.get_values(data.decode())
-            self._executor.execute(request)
             log.debug('received {!r}'.format(data))
-            writer.write(data)
+
+            request = self._parser.get_values(data.decode())
+            response = await self._executor.execute(request)
+            response_data = self._serializer.dump(response)
+
+            # writer.write(response_data)
+            writer.write(b"hello world")
             await writer.drain()
-            log.debug('sent {!r}'.format(data))
+            writer.close()
+            # log.debug('sent {!r}'.format(response_data))
         else:
             log.debug('closing')
             writer.close()
