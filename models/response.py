@@ -1,25 +1,42 @@
 from datetime import datetime
 
-from models.response_head import ResponseHead
 
-
-class ResponseGet(ResponseHead):
-
-    today_date = datetime.today()
+class Response:
+    # status-codes
+    OK = '200 OK'
+    NOT_FOUND = '404 Not Found'
+    METHOD_NOT_ALLOWED = '405 Method Not Allowed'
+    #
 
     def __init__(self, status_code: str,
                  protocol: str,
+                 connection,
                  content_type: str = '',
-                 content_length=None,
-                 body=None,
-                 connection=None):
-        super().__init__(status_code, protocol, connection)
-
+                 content_length=0,
+                 body=''):
+        self._status_code = status_code
+        self._protocol = protocol
+        self._connection = connection
         self._content_type = content_type
         self._content_length = content_length
         self._body = body
+
         self._server = "server"
-        self._date = ResponseGet.today_date
+        self._date = Response.today_date
+
+    today_date = datetime.today()
+
+    @property
+    def status_code(self) -> str:
+        return self._status_code
+
+    @property
+    def protocol(self) -> str:
+        return self._protocol
+
+    @property
+    def connection(self) -> str:
+        return self._connection
 
     @property
     def content_type(self) -> str:

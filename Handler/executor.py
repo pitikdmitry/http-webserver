@@ -8,8 +8,7 @@ from models.request import Request
 from urllib import parse
 import aiofiles
 
-from models.response_get import ResponseGet
-from models.response_head import ResponseHead
+from models.response import Response
 
 
 class Executor:
@@ -19,46 +18,31 @@ class Executor:
 
     async def execute(self, request: Request):
         if request.method not in ('GET', 'HEAD'):
-            return ResponseGet(ResponseGet.OK, protocol=request.protocol)
+            return Response(Response.OK, protocol=request.protocol)
         elif request.method == "HEAD":
             return self.execute_head(request)
         else:
             return await self.execute_get(request)
 
-    def execute_head(self, request: Request) -> ResponseHead:
+    def execute_head(self, request: Request) -> Response:
         try:
             file = self.get_file_info(request)
-        except BadFilePathException:
-            return ResponseHead(status_code=ResponseHead.FORBIDDEN, protocol=request.protocol)
-        # try:
-        #     content_length = self._build_content_length(resource=resource)
-        # except NotFoundError:
-        #     return Response(status_code=StatusCodes.NOT_FOUND, protocol=request.protocol)
-        #
-        # return Response(status_code=StatusCodes.OK, protocol=request.protocol,
-        #                 content_length=content_length, content_type=resource.content_type.value, body=b'')
+            content_length = self.get_file_content_length(file.file_path)
+        except (BadFilePathException, FileNotFoundError):
+            return Response(status_code=Response.NOT_FOUND, protocol=request.protocol)
 
-    async def execute_get(self, request: Request) -> ResponseGet:
+    async def execute_get(self, request: Request) -> Response:
         try:
             file = self.get_file_info(request)
-        except BadFilePathException:
-            return ResponseGet(status_code=ResponseGet.FORBIDDEN, protocol=request.protocol)
-
-        try:
             body = await self.read_file(file.file_path)
-        except FileNotFoundError:
-            if request.url[-1:] == '/':
-                return ResponseGet(status_code=ResponseGet.FORBIDDEN, protocol=request.protocol)
-            else:
-                return ResponseGet(status_code=ResponseGet.NOT_FOUND, protocol=request.protocol)
-        except NotADirectoryError:
-            return ResponseGet(status_code=ResponseGet.NOT_FOUND, protocol=request.protocol)
+        except (BadFilePathException, FileNotFoundError):
+            return Response(status_code=Response.NOT_FOUND, protocol=request.protocol)
 
-        return ResponseGet(status_code=ResponseGet.OK,
-                           protocol=request.protocol,
-                           content_type=file.content_type.value,
-                           content_length=len(body),
-                           body=body)
+        return Response(status_code=Response.OK,
+                        protocol=request.protocol,
+                        content_type=file.content_type.value,
+                        content_length=len(body),
+                        body=body)
 
     def get_file_info(self, request: Request) -> File:
 
@@ -103,3 +87,10 @@ class Executor:
 
         async with aiofiles.open(filename, mode='rb') as f:
             return await f.read()
+
+    @staticmethod
+    def get_file_content_length(filename):
+        if not os.path.isfile(filename):
+            raise FileNotFoundError
+
+        return os.path.getsize(filename)
