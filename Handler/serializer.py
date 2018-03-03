@@ -16,12 +16,15 @@ class Serializer:
                "Server: {}\r\n" \
                "Date: {}\r\n" \
                "Connection: {}\r\n" \
-               "Content-Type: {}\r\n" \
-               "Content-Length: {}\r\n\r\n".format(response.protocol, response.status_code,
-                                                   response.server, response.date, response.connection,
-                                                   response.content_type, response.content_length)
+               "Content-Length: {}\r\n" \
+               "Content-Type: {}\r\n\r\n".format(response.protocol, response.status_code,
+                                                 response.server, response.date, response.connection,
+                                                 response.content_length, response.content_type)
 
     @staticmethod
     def bad_response(response: Response) -> str:
         return "{} {}\r\n" \
-               "Server: Server\r\n\r\n".format(response.protocol, response.status_code)
+               "Server: {}\r\n" \
+               "Date: {}\r\n" \
+               "Connection: {}\r\n\r\n".format(response.protocol, response.status_code,
+                                               response.server, response.date, response.connection)
