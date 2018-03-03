@@ -28,7 +28,7 @@ class Server:
     #         # event_loop.close()
     def start(self):
         event_loop = asyncio.get_event_loop()
-        factory = event_loop.create_server(self._handler.handle, host=self._address)
+        factory = event_loop.create_server(Handler, host=self._address, port=self._port)
         server = event_loop.run_until_complete(factory)
         logging.debug('starting up on {} port {}'.format(self._address, self._port))
         try:
