@@ -12,7 +12,7 @@ class Serializer:
 
     @staticmethod
     def _success_response(response: Response) -> str:
-        return "HTTP/{} {}\r\n" \
+        return "{} {}\r\n" \
                "Server: Server\r\n" \
                "Content-Type: {}\r\n" \
                "Content-Length: {}\r\n\r\n".format(response.protocol, response.status_code,
@@ -20,5 +20,5 @@ class Serializer:
 
     @staticmethod
     def _error_response(response: Response) -> str:
-        return "HTTP/{} {}\r\n" \
+        return "{} {}\r\n" \
                "Server: Server\r\n\r\n".format(response.protocol, response.status_code)
