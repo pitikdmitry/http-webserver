@@ -1,20 +1,13 @@
 import os
 
 from models.content_types import ContentTypes
+from models.exceptions import FileNotFoundException, BadFilePathException
 from models.file import File
 from models.request import Request
 from models.response import Response
 
 from urllib import parse
 import aiofiles
-
-
-class ForbiddenError(BaseException):
-    pass
-
-
-class NotFoundError(BaseException):
-    pass
 
 
 class Executor:
@@ -26,14 +19,14 @@ class Executor:
         if request.method not in ('GET', 'HEAD'):
             return Response(Response.OK, protocol=request.protocol)
         elif request.method == "HEAD":
-            return await self.execute_head(request)
+            return self.execute_head(request)
         else:
             return await self.execute_get(request)
 
-    async def execute_head(self, request: Request) -> Response:
+    def execute_head(self, request: Request) -> Response:
         try:
-            file = self.get_file(request)
-        except ForbiddenError:
+            file = self.get_file_info(request)
+        except BadFilePathException:
             return Response(status_code=Response.FORBIDDEN, protocol=request.protocol)
         # try:
         #     content_length = self._build_content_length(resource=resource)
@@ -45,20 +38,18 @@ class Executor:
 
     async def execute_get(self, request: Request) -> Response:
         try:
-            file = self.get_file(request)
-        except ForbiddenError:
+            file = self.get_file_info(request)
+        except BadFilePathException:
             return Response(status_code=Response.FORBIDDEN, protocol=request.protocol)
 
         try:
             body = await self.read_file(file.file_path)
         except FileNotFoundError:
-            print("exdc")
             if request.url[-1:] == '/':
                 return Response(status_code=Response.FORBIDDEN, protocol=request.protocol)
             else:
                 return Response(status_code=Response.NOT_FOUND, protocol=request.protocol)
         except NotADirectoryError:
-            print("exdc")
             return Response(status_code=Response.NOT_FOUND, protocol=request.protocol)
 
         resp = Response(status_code=Response.OK,
@@ -68,7 +59,7 @@ class Executor:
                         body=body)
         return resp
 
-    def get_file(self, request: Request) -> File:
+    def get_file_info(self, request: Request) -> File:
 
         file_path = self.check_last_slash(request.url)
         self.check_dots(file_path)
@@ -90,7 +81,7 @@ class Executor:
     @staticmethod
     def check_dots(url: str) -> None:
         if url.find("../") != -1:
-            raise ForbiddenError
+            raise BadFilePathException
 
     @staticmethod
     def try_decode(url):
@@ -107,5 +98,8 @@ class Executor:
 
     @staticmethod
     async def read_file(filename: str) -> bytes:
+        if not os.path.isfile(filename):
+            raise FileNotFoundException
+
         async with aiofiles.open(filename, mode='rb') as f:
             return await f.read()

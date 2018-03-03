@@ -1,4 +1,3 @@
-import asyncio
 import logging
 
 from Handler.executor import Executor
@@ -40,7 +39,7 @@ class Handler:
             writer.write(response_data)
             await writer.drain()
             writer.close()
-            # log.debug('sent {!r}'.format(response_data))
+            log.debug('sent {!r}'.format(response_data))
         else:
             log.debug('closing')
             writer.close()
