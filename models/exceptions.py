@@ -1,6 +1,6 @@
-class FileNotFoundException(BaseException):
+class BadFilePathException(BaseException):
     pass
 
 
-class BadFilePathException(BaseException):
+class ForbiddenException(BaseException):
     pass

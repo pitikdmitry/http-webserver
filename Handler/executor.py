@@ -1,7 +1,7 @@
 import os
 
 from models.content_types import ContentTypes
-from models.exceptions import BadFilePathException
+from models.exceptions import BadFilePathException, ForbiddenException
 from models.file import File
 from models.request import Request
 
@@ -40,16 +40,17 @@ class Executor:
     async def execute_get(self, request: Request) -> Response:
         try:
             file = self.get_file_info(request)
-            body = await self.read_file(file.file_path)
+            body = await self.read_file(file.file_path, request.url)
             return Response(status_code=Response.OK,
                             protocol=request.protocol,
                             connection=request.connection,
                             content_type=file.content_type.value,
                             content_length=len(body),
                             body=body)
-
         except (BadFilePathException, FileNotFoundError):
             return Response(status_code=Response.NOT_FOUND, protocol=request.protocol, connection=request.connection)
+        except ForbiddenException:
+            return Response(status_code=Response.FORBIDDEN, protocol=request.protocol, connection=request.connection)
 
     def get_file_info(self, request: Request) -> File:
 
@@ -88,9 +89,12 @@ class Executor:
             return ContentTypes["html"]
 
     @staticmethod
-    async def read_file(filename: str) -> bytes:
+    async def read_file(filename: str, url) -> bytes:
         if not os.path.isfile(filename):
-            raise FileNotFoundError
+            if url[-1] == '/':
+                raise ForbiddenException
+            else:
+                raise FileNotFoundError
 
         async with aiofiles.open(filename, mode='rb') as f:
             return await f.read()

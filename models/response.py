@@ -6,6 +6,7 @@ class Response:
     OK = '200 OK'
     NOT_FOUND = '404 Not Found'
     METHOD_NOT_ALLOWED = '405 Method Not Allowed'
+    FORBIDDEN = '403 Forbidden'
     #
 
     def __init__(self, status_code: str,
@@ -13,7 +14,7 @@ class Response:
                  connection,
                  content_type: str = '',
                  content_length=0,
-                 body=''):
+                 body=b''):
         self._status_code = status_code
         self._protocol = protocol
         self._connection = connection

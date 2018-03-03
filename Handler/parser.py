@@ -11,9 +11,11 @@ class Parser:
             arr = data.split("\r\n")
             method, query, protocol = self.method_query_protocol(arr[0])
             url = self.url(query)
+            connection = self.search_connection()
+
         except BaseException:
-            return Request("unknown", "unknown", "unknown")
-        return Request(method, protocol, url)
+            return Request("unknown", "unknown", "unknown", "unknown")
+        return Request(method, protocol, url, connection)
 
     @staticmethod
     def method_query_protocol(str_m_q_r: str) -> tuple:
@@ -27,3 +29,7 @@ class Parser:
     def url(query: str) -> str:
         list_q_p = query.split("?")
         return list_q_p[0]
+
+    @staticmethod
+    def search_connection():
+        return ''
