@@ -4,30 +4,32 @@ from models.content_types import ContentTypes
 from models.exceptions import BadFilePathException
 from models.file import File
 from models.request import Request
-from models.response import Response
 
 from urllib import parse
 import aiofiles
+
+from models.response_get import ResponseGet
+from models.response_head import ResponseHead
 
 
 class Executor:
 
     def __init__(self):
-        pass
+        self._document_root = os.getcwd() + "/http-test-suite/"
 
-    async def execute(self, request: Request) -> Response:
+    async def execute(self, request: Request):
         if request.method not in ('GET', 'HEAD'):
-            return Response(Response.OK, protocol=request.protocol)
+            return ResponseGet(ResponseGet.OK, protocol=request.protocol)
         elif request.method == "HEAD":
             return self.execute_head(request)
         else:
             return await self.execute_get(request)
 
-    def execute_head(self, request: Request) -> Response:
+    def execute_head(self, request: Request) -> ResponseHead:
         try:
             file = self.get_file_info(request)
         except BadFilePathException:
-            return Response(status_code=Response.FORBIDDEN, protocol=request.protocol)
+            return ResponseHead(status_code=ResponseHead.FORBIDDEN, protocol=request.protocol)
         # try:
         #     content_length = self._build_content_length(resource=resource)
         # except NotFoundError:
@@ -36,28 +38,27 @@ class Executor:
         # return Response(status_code=StatusCodes.OK, protocol=request.protocol,
         #                 content_length=content_length, content_type=resource.content_type.value, body=b'')
 
-    async def execute_get(self, request: Request) -> Response:
+    async def execute_get(self, request: Request) -> ResponseGet:
         try:
             file = self.get_file_info(request)
         except BadFilePathException:
-            return Response(status_code=Response.FORBIDDEN, protocol=request.protocol)
+            return ResponseGet(status_code=ResponseGet.FORBIDDEN, protocol=request.protocol)
 
         try:
             body = await self.read_file(file.file_path)
         except FileNotFoundError:
             if request.url[-1:] == '/':
-                return Response(status_code=Response.FORBIDDEN, protocol=request.protocol)
+                return ResponseGet(status_code=ResponseGet.FORBIDDEN, protocol=request.protocol)
             else:
-                return Response(status_code=Response.NOT_FOUND, protocol=request.protocol)
+                return ResponseGet(status_code=ResponseGet.NOT_FOUND, protocol=request.protocol)
         except NotADirectoryError:
-            return Response(status_code=Response.NOT_FOUND, protocol=request.protocol)
+            return ResponseGet(status_code=ResponseGet.NOT_FOUND, protocol=request.protocol)
 
-        resp = Response(status_code=Response.OK,
-                        protocol=request.protocol,
-                        content_type=file.content_type.value,
-                        content_length=len(body),
-                        body=body)
-        return resp
+        return ResponseGet(status_code=ResponseGet.OK,
+                           protocol=request.protocol,
+                           content_type=file.content_type.value,
+                           content_length=len(body),
+                           body=body)
 
     def get_file_info(self, request: Request) -> File:
 
@@ -65,8 +66,7 @@ class Executor:
         self.check_dots(file_path)
         file_path = self.try_decode(file_path)
 
-        working_dir = os.getcwd()
-        full_file_path = os.path.join(working_dir + "/http-test-suite/", file_path)
+        full_file_path = os.path.join(self._document_root, file_path)
         content_type = self.get_content_type(file_path)
 
         return File(full_file_path, content_type)
@@ -94,7 +94,7 @@ class Executor:
             content_type_name = file_path.split('.')[-1]
             return ContentTypes[content_type_name]
         except KeyError:
-            return ContentTypes["plain"]
+            return ContentTypes["html"]
 
     @staticmethod
     async def read_file(filename: str) -> bytes:

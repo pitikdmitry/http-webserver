@@ -1,27 +1,24 @@
 from datetime import datetime
 
 
-class Response:
+class ResponseGet:
     # status-codes
     OK = '200 OK'
     NOT_FOUND = '404 Not Found'
-    NOT_ALLOWED = '405 Method Not Allowed'
+    METHOD_NOT_ALLOWED = '405 Method Not Allowed'
     FORBIDDEN = '403 Forbidden'
     #
 
-    def __init__(self,
-                 status_code: str,
+    today_date = datetime.today()
+
+    def __init__(self, status_code: str,
                  protocol: str,
-                 content_type: str = '',
-                 content_length: int = None,
-                 body: bytes = b'',
-                 date: datetime = None):
+                 connection=None):
         self._status_code = status_code
         self._protocol = protocol
-        self._content_type = content_type
-        self._content_length = content_length
-        self._body = body
-        self._date = date
+        self._server = "server"
+        self._date = ResponseGet.today_date
+        self._connection = connection
 
     @property
     def status_code(self) -> str:
@@ -32,10 +29,6 @@ class Response:
         return self._protocol
 
     @property
-    def body(self) -> bytes:
-        return self._body
-
-    @property
     def content_type(self) -> str:
         return self._content_type
 
@@ -44,5 +37,17 @@ class Response:
         return self._content_length
 
     @property
+    def body(self) -> str:
+        return self._body
+
+    @property
+    def server(self) -> str:
+        return self._server
+
+    @property
     def date(self) -> datetime:
         return self._date
+
+    @property
+    def connection(self) -> str:
+        return self._connection
