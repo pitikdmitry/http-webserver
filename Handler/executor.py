@@ -18,7 +18,7 @@ class Executor:
 
     async def execute(self, request: Request):
         if request.method not in ('GET', 'HEAD'):
-            return Response(Response.OK, protocol=request.protocol)
+            return Response(Response.METHOD_NOT_ALLOWED, protocol=request.protocol, connection=request.connection)
         elif request.method == "HEAD":
             return self.execute_head(request)
         else:
@@ -28,21 +28,28 @@ class Executor:
         try:
             file = self.get_file_info(request)
             content_length = self.get_file_content_length(file.file_path)
+            return Response(status_code=Response.OK,
+                            protocol=request.protocol,
+                            connection=request.connection,
+                            content_type=file.content_type.value,
+                            content_length=content_length)
+
         except (BadFilePathException, FileNotFoundError):
-            return Response(status_code=Response.NOT_FOUND, protocol=request.protocol)
+            return Response(status_code=Response.NOT_FOUND, protocol=request.protocol, connection=request.connection)
 
     async def execute_get(self, request: Request) -> Response:
         try:
             file = self.get_file_info(request)
             body = await self.read_file(file.file_path)
-        except (BadFilePathException, FileNotFoundError):
-            return Response(status_code=Response.NOT_FOUND, protocol=request.protocol)
+            return Response(status_code=Response.OK,
+                            protocol=request.protocol,
+                            connection=request.connection,
+                            content_type=file.content_type.value,
+                            content_length=len(body),
+                            body=body)
 
-        return Response(status_code=Response.OK,
-                        protocol=request.protocol,
-                        content_type=file.content_type.value,
-                        content_length=len(body),
-                        body=body)
+        except (BadFilePathException, FileNotFoundError):
+            return Response(status_code=Response.NOT_FOUND, protocol=request.protocol, connection=request.connection)
 
     def get_file_info(self, request: Request) -> File:
 
