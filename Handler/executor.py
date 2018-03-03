@@ -5,6 +5,7 @@ from models.file import File
 from models.request import Request
 from models.response import Response
 
+from urllib import parse
 import aiofiles
 
 
@@ -16,7 +17,7 @@ class NotFoundError(BaseException):
     pass
 
 
-class Executor: #   добавить async методы сюда везде
+class Executor:
 
     def __init__(self):
         pass
@@ -71,9 +72,10 @@ class Executor: #   добавить async методы сюда везде
 
         file_path = self.check_last_slash(request.url)
         self.check_dots(file_path)
+        file_path = self.try_decode(file_path)
 
         working_dir = os.getcwd()
-        full_file_path = os.path.join(working_dir + "/http-test-suite/httptest", file_path)
+        full_file_path = os.path.join(working_dir + "/http-test-suite/", file_path)
         content_type = self.get_content_type(file_path)
 
         return File(full_file_path, content_type)
@@ -87,8 +89,13 @@ class Executor: #   добавить async методы сюда везде
 
     @staticmethod
     def check_dots(url: str) -> None:
-        if len(url.split('../')) > 1:
+        if url.find("../") != -1:
             raise ForbiddenError
+
+    @staticmethod
+    def try_decode(url):
+        url = parse.unquote(url)
+        return url
 
     @staticmethod
     def get_content_type(file_path) -> ContentTypes:

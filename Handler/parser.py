@@ -7,9 +7,12 @@ class Parser:
         pass
 
     def get_values(self, data) -> Request:
-        arr = data.split("\r\n")
-        method, query, protocol = self.method_query_protocol(arr[0])
-        url = self.url(query)
+        try:
+            arr = data.split("\r\n")
+            method, query, protocol = self.method_query_protocol(arr[0])
+            url = self.url(query)
+        except BaseException:
+            return Request("unknown", "unknown", "unknown")
         return Request(method, protocol, url)
 
     @staticmethod
