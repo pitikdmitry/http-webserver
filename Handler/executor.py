@@ -1,7 +1,7 @@
 import os
 
 from models.content_types import ContentTypes
-from models.exceptions import FileNotFoundException, BadFilePathException
+from models.exceptions import BadFilePathException
 from models.file import File
 from models.request import Request
 from models.response import Response
@@ -99,7 +99,7 @@ class Executor:
     @staticmethod
     async def read_file(filename: str) -> bytes:
         if not os.path.isfile(filename):
-            raise FileNotFoundException
+            raise FileNotFoundError
 
         async with aiofiles.open(filename, mode='rb') as f:
             return await f.read()

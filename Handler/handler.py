@@ -10,11 +10,12 @@ class Handler:
         self._parser = Parser()
         self._executor = Executor()
         self._serializer = Serializer()
+        self._log = logging.getLogger("handler")
 
     async def handle(self, reader, writer):
         address = writer.get_extra_info('peername')
-        log = logging.getLogger('echo_{}_{}'.format(*address))
-        log.debug('connection accepted')
+        self._log.debug('echo_{}_{}'.format(*address))
+        self._log.debug('connection accepted')
 
         block_size = 128
         data = b""
@@ -30,7 +31,7 @@ class Handler:
                 break
 
         if len(data) > 0:
-            log.debug('received {!r}'.format(data))
+            self._log.debug('received {!r}'.format(data))
 
             request = self._parser.get_values(data.decode())
             response = await self._executor.execute(request)
@@ -39,8 +40,8 @@ class Handler:
             writer.write(response_data)
             await writer.drain()
             writer.close()
-            log.debug('sent {!r}'.format(response_data))
+            self._log.debug('sent {!r}'.format(response_data))
         else:
-            log.debug('closing')
+            self._log.debug('closing')
             writer.close()
             return
