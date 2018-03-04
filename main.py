@@ -3,6 +3,8 @@ from Handler.handler import Handler
 import logging
 import sys
 
+from models.config import Config
+
 logging.basicConfig(
     level=logging.DEBUG,
     format='%(name)s: %(message)s',
@@ -10,6 +12,7 @@ logging.basicConfig(
 )
 
 if __name__ == '__main__':
+    config = Config("/etc/httpd.conf")
     handler = Handler()
-    server = Server("127.0.0.1", 10001, handler)
+    server = Server(config.host, config.port, handler)
     server.start()

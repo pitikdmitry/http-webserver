@@ -17,7 +17,7 @@ class Handler:
         self._log.debug('echo_{}_{}'.format(*address))
         self._log.debug('connection accepted')
 
-        block_size = 128
+        block_size = 1024
         data = b""
         while True:
             block = await reader.read(block_size)
