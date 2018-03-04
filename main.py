@@ -14,5 +14,5 @@ logging.basicConfig(
 if __name__ == '__main__':
     config = Config("/etc/httpd.conf")
     handler = Handler()
-    server = Server(config.host, config.port, handler)
+    server = Server(config.host, config.port, config, handler)
     server.start()
