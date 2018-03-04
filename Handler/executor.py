@@ -1,4 +1,5 @@
 import os
+import logging
 
 from models.config import Config
 from models.content_types import ContentTypes
@@ -15,7 +16,9 @@ class Executor:
 
     def __init__(self):
         self._config = Config("/etc/httpd.conf")
-        # self._document_root = os.getcwd() + "/http-test-suite/"
+        self._files_root = self._config.document_root + "/http-test/"
+        logging.debug(r"doc root: " + self._config.document_root)
+        # self._document_root = os.getcwd() + "/http-test/"
 
     async def execute(self, request):
         if request.method not in ('GET', 'HEAD'):
@@ -59,7 +62,8 @@ class Executor:
         self.check_dots(file_path)
         file_path = self.try_decode(file_path)
 
-        full_file_path = os.path.join(self._config.document_root + "/http-test-suite/", file_path)
+        full_file_path = os.path.join(self._files_root, file_path)
+        logging.info("full_file_path: " + full_file_path)
         content_type = self.get_content_type(file_path)
 
         return File(full_file_path, content_type)

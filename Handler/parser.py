@@ -1,10 +1,11 @@
 from models.request import Request
+import logging
 
 
 class Parser:
 
     def __init__(self):
-        pass
+        self._log = logging.getLogger("parser")
 
     def get_values(self, data):
         try:
@@ -13,7 +14,8 @@ class Parser:
             url = self.url(query)
             connection = self.get_connection()
 
-        except BaseException:
+        except BaseException as e:
+            self._log.debug('parsing exc: {}'.format(e))
             return Request("unknown", "unknown", "unknown", "unknown")
         return Request(method, protocol, url, connection)
 
