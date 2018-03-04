@@ -1,23 +1,23 @@
 class Request:
 
-    def __init__(self, method: str, protocol: str, url: str, connection: str) -> None:
+    def __init__(self, method, protocol, url, connection):
         self._method = method
         self._protocol = protocol
         self._url = url
         self._connection = connection
 
     @property
-    def method(self) -> str:
+    def method(self):
         return self._method
 
     @property
-    def protocol(self) -> str:
+    def protocol(self):
         return self._protocol
 
     @property
-    def url(self) -> str:
+    def url(self):
         return self._url
 
     @property
-    def connection(self) -> str:
+    def connection(self):
         return self._connection

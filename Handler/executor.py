@@ -3,7 +3,6 @@ import os
 from models.content_types import ContentTypes
 from models.exceptions import BadFilePathException, ForbiddenException
 from models.file import File
-from models.request import Request
 
 from urllib import parse
 import aiofiles
@@ -16,7 +15,7 @@ class Executor:
     def __init__(self):
         self._document_root = os.getcwd() + "/http-test-suite/"
 
-    async def execute(self, request: Request):
+    async def execute(self, request):
         if request.method not in ('GET', 'HEAD'):
             return Response(Response.METHOD_NOT_ALLOWED, protocol=request.protocol, connection=request.connection)
         elif request.method == "HEAD":
@@ -24,7 +23,7 @@ class Executor:
         else:
             return await self.execute_get(request)
 
-    def execute_head(self, request: Request) -> Response:
+    def execute_head(self, request):
         try:
             file = self.get_file_info(request)
             content_length = self.get_file_content_length(file.file_path)
@@ -37,7 +36,7 @@ class Executor:
         except (BadFilePathException, FileNotFoundError):
             return Response(status_code=Response.NOT_FOUND, protocol=request.protocol, connection=request.connection)
 
-    async def execute_get(self, request: Request) -> Response:
+    async def execute_get(self, request):
         try:
             file = self.get_file_info(request)
             body = await self.read_file(file.file_path, request.url)
@@ -52,7 +51,7 @@ class Executor:
         except ForbiddenException:
             return Response(status_code=Response.FORBIDDEN, protocol=request.protocol, connection=request.connection)
 
-    def get_file_info(self, request: Request) -> File:
+    def get_file_info(self, request):
 
         file_path = self.check_last_slash(request.url)
         self.check_dots(file_path)
@@ -64,14 +63,14 @@ class Executor:
         return File(full_file_path, content_type)
 
     @staticmethod
-    def check_last_slash(url: str) -> str:
+    def check_last_slash(url):
         if url[-1:] == '/':
             return url[1:] + 'index.html'
         else:
             return url[1:]
 
     @staticmethod
-    def check_dots(url: str) -> None:
+    def check_dots(url):
         if url.find("../") != -1:
             raise BadFilePathException
 
@@ -81,7 +80,7 @@ class Executor:
         return url
 
     @staticmethod
-    def get_content_type(file_path) -> ContentTypes:
+    def get_content_type(file_path):
         try:
             content_type_name = file_path.split('.')[-1]
             return ContentTypes[content_type_name]
@@ -89,7 +88,7 @@ class Executor:
             return ContentTypes["html"]
 
     @staticmethod
-    async def read_file(filename: str, url) -> bytes:
+    async def read_file(filename, url):
         if not os.path.isfile(filename):
             if url[-1] == '/':
                 raise ForbiddenException

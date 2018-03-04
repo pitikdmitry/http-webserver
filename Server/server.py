@@ -1,10 +1,9 @@
 import asyncio
 import logging
-from Handler.handler import Handler
 
 
 class Server:
-    def __init__(self, address: str, port: int, handler: Handler):
+    def __init__(self, address, port, handler):
         self._address = address
         self._port = port
         self._handler = handler
