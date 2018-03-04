@@ -96,7 +96,7 @@ class Executor:
     @staticmethod
     async def read_file(filename, url):
         if not os.path.isfile(filename):
-            if url[-1] == '/':
+            if url[-1] == '/' and url.count(".") < 1:
                 raise ForbiddenException
             else:
                 raise FileNotFoundError
