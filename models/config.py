@@ -19,9 +19,9 @@ class Config:
     def read_file(self):
         if not os.path.isfile(self._file_name):
             # local
-            # self._file_name = "./local.conf"
+            self._file_name = "./local.conf"
             # docker
-            self._file_name = "./httpd.conf"
+            # self._file_name = "./httpd.conf"
             self._log.debug("default_config")
         else:
             self._log.debug("normal config")
