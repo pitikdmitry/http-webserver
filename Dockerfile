@@ -5,13 +5,13 @@ MAINTAINER Pitik Dmitry
 #RUN apt-get update
 #RUN apt-get install python3-setuptools
 #RUN easy_install3 pip
-
 ADD ./ /my_application
+RUN pip install -r /my_application/requirements.txt
+
 ADD ./http-test /var/www/html/http-test
 
 # Get pip to download and install requirements:
 #RUN python3 -m pip install -r /my_application/requirements.txt
-RUN pip install -r /my_application/requirements.txt
 
 EXPOSE 80
 
