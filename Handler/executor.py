@@ -17,7 +17,9 @@ class Executor:
     def __init__(self):
         self._config = Config("/etc/httpd.conf")
         self._files_root = self._config.document_root
-        logging.debug(r"doc root: " + self._config.document_root)
+
+        self._log = logging.getLogger("executor")
+        self._log.debug(r"doc root: " + self._config.document_root)
         # self._document_root = os.getcwd() + "/http-test/"
 
     async def execute(self, request):
@@ -63,7 +65,7 @@ class Executor:
         file_path = self.try_decode(file_path)
 
         full_file_path = os.path.join(self._files_root, file_path)
-        logging.info("full_file_path: " + full_file_path)
+        self._log.debug("full_file_path: " + full_file_path)
         content_type = self.get_content_type(file_path)
 
         return File(full_file_path, content_type)

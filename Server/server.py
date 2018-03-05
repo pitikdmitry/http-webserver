@@ -22,14 +22,14 @@ class Server:
 
     def start(self):
         forks = []
-        for i in range(0, int(self._config.cpu_limit) * 2):
+        for i in range(0, int(self._config.cpu_limit)):
             pid = os.fork()
             forks.append(pid)
             if pid == 0:
                 event_loop = asyncio.get_event_loop()
                 self._log.debug("pid: " + str(os.getpid()))
 
-                for j in range(0, int(self._config.thread_limit)):
+                for j in range(0, int(self._config.thread_limit) * 2):
                     event_loop.create_task(self.start_server(event_loop))
                 # server = event_loop.run_until_complete(server_gen)
 

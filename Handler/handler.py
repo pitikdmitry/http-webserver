@@ -26,7 +26,6 @@ class Handler:
             if not block or reader.at_eof():
                 break
 
-            print(data[-4:])
             if data[-4:] == b'\r\n\r\n':
                 break
 

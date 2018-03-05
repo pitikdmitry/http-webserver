@@ -6,7 +6,7 @@ import sys
 from models.config import Config
 
 logging.basicConfig(
-    level=logging.DEBUG,
+    level=logging.ERROR,
     format='%(name)s: %(message)s',
     stream=sys.stderr,
 )
