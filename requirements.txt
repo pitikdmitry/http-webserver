@@ -1,2 +1,2 @@
-aiofiles
-uvloop
+aiofiles==0.3.2
+uvloop==0.9.1

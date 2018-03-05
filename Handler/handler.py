@@ -40,7 +40,7 @@ class Handler:
             writer.write(response_data)
             await writer.drain()
             writer.close()
-            self._log.debug('sent {!r}'.format(response_data))
+            # self._log.debug('sent {!r}'.format(response_data))
         else:
             self._log.debug('closing')
             writer.close()

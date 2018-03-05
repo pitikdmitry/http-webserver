@@ -8,7 +8,7 @@ MAINTAINER Pitik Dmitry
 ADD ./ /my_application
 RUN pip install -r /my_application/requirements.txt
 
-ADD ./http-test /var/www/html.
+ADD ./http-test /var/www/html
 
 # Get pip to download and install requirements:
 #RUN python3 -m pip install -r /my_application/requirements.txt
