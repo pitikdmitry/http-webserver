@@ -16,7 +16,7 @@ class Executor:
 
     def __init__(self):
         self._config = Config("/etc/httpd.conf")
-        self._files_root = self._config.document_root + "/http-test/"
+        self._files_root = self._config.document_root
         logging.debug(r"doc root: " + self._config.document_root)
         # self._document_root = os.getcwd() + "/http-test/"
 
